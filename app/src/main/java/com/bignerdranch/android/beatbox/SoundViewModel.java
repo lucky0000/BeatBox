@@ -19,4 +19,8 @@ public class SoundViewModel {
     public String getTitle() {
         return sound.getName();
     }
+
+    public void onButtonClicked() {
+        beatBox.play(sound);
+    }
 }

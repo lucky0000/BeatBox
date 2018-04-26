@@ -26,9 +26,16 @@ public class BeatBoxFragment extends Fragment {
     private BeatBox mBeatBox;
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mBeatBox.release();
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        //fragment不会被销毁(旋转屏幕时)
+setRetainInstance(true);
         mBeatBox = new BeatBox(getActivity());
     }
 

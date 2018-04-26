@@ -1,7 +1,10 @@
 package com.bignerdranch.android.beatbox;
 
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.util.Log;
 
 import java.io.IOException;
@@ -11,13 +14,38 @@ import java.util.List;
 public class BeatBox {
     private static final String TAG = "BeatBox";
     private static final String SOUNDS_FOLDER = "sample_sounds";
+    private static final int MAX_SOUNDS = 5;
 
     private AssetManager mAssets;
     private List<Sound> sounds = new ArrayList<>();
+    private SoundPool mSoundPool;
 
     public BeatBox(Context context) {
         mAssets = context.getAssets();
+        mSoundPool = new SoundPool(MAX_SOUNDS, AudioManager.STREAM_MUSIC, 0);
         loadSounds();
+    }
+
+    /**
+     * 加载声音的id
+     *
+     * @param sound
+     * @throws IOException
+     */
+    private void load(Sound sound) throws IOException {
+        AssetFileDescriptor afd = mAssets.openFd(sound.getAssetPath());
+        int soundId = mSoundPool.load(afd, 1);
+        sound.setSoundId(soundId);
+
+    }
+
+
+    public void play(Sound sound) {
+        Integer soundId = sound.getSoundId();
+        if (soundId == null) {
+            return;
+        }
+        mSoundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f);
     }
 
     private void loadSounds() {
@@ -35,6 +63,11 @@ public class BeatBox {
                 soundNames) {
             String assetPath = SOUNDS_FOLDER + "/" + filename;
             Sound sound = new Sound(assetPath);
+            try {
+                load(sound);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             sounds.add(sound);
 
         }
@@ -46,4 +79,7 @@ public class BeatBox {
         return sounds;
     }
 
+    public void release() {
+        mSoundPool.release();
+    }
 }
